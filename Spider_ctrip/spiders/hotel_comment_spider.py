@@ -37,18 +37,16 @@ class HotelCommentSpider(scrapy.Spider):
         except:
             pass
 
-        if not os.path.exists('data/%s' % cur_url_num):
-            os.mkdir('data/%s' % cur_url_num)
-        filename = 'data/%s/hotel-%s.html' % (cur_url_num, cur_url_num)
+        filename = 'data/hotel_page/hotel-%s.html' % (cur_url_num)
         if not os.path.exists(filename):
             with open(filename, 'wb') as f:
                 f.write(response.body)
-        filename = 'data/%s/comment-%s.json' % (cur_url_num, cur_url_num)
+        filename = 'data/hotel_comment/comment-%s.json' % (cur_url_num)
         if not os.path.exists(filename):
             try:
                 sel = Selector(response)
                 total_page = sel.css('.c_page_list a').xpath('@value').extract()[-1]
-                pages = [i + 2 for i in range(int(total_page) - 2)]
+                pages = [i + 2 for i in range(int(total_page) - 1)]
                 random.shuffle(pages)
             except:
                 pages = []
@@ -73,9 +71,11 @@ class HotelCommentSpider(scrapy.Spider):
                     pages.append(cur_page)
                     logging.info(cur_url_num + '\terror ' + str(len(pages)))
 
-            with open(filename, 'a') as f:
-                for item in results:
-                    f.write(item + '\n')
+            if results != []:
+                with open(filename, 'a') as f:
+                    for item in results:
+                        f.write(item + '\n')
+
         logging.info(cur_url + '\tEnding...')
 
         n = self.urls.pop(0)[:-1]
